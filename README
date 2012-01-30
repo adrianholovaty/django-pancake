@@ -1,0 +1,62 @@
+==============
+django-pancake
+==============
+
+By Adrian Holovaty <adrian@holovaty.com>
+
+Library for "flattening" Django templates.
+
+Run "manage.py pancake" with an output directory name, and it will fill that
+directory with a "flat" version of each template -- a pancake. A pancake is a
+template in which:
+
+* Template inheritance is fully expanded. {% extends %} and {% block %} tags
+  are gone, and the parent templates are fully folded in.
+
+* {% include %} and {% ssi %} tags are gone, with their contents fully folded
+  in.
+
+Pancakes behave exactly the same as the original templates. But they render
+more quickly, because they avoid the overhead of template inheritance and
+template includes at rendering time.
+
+Think of it as "denormalizing" your templates, as a database administrator
+might denormalize SQL tables for performance. You give up the DRY principle
+but make up for it in faster application speed.
+
+Obviously, pancakes are very redundant -- each of them includes all of the
+markup from the base template(s), etc. You shouldn't check pancakes into
+revision control or hand-edit them. They're purely for performance and should
+be handled as any automatically generated code.
+
+Usage
+=====
+
+1. Generate the pancakes:
+
+    ./manage.py pancake /path/to/new/template/directory
+
+2. Point Django at the pancake directory:
+
+    TEMPLATE_DIRS = [
+        '/path/to/new/template/directory',
+    ]
+
+3. Enjoy faster template performance.
+
+Related projects
+================
+
+Ideally, django-pancake wouldn't exist, and Django would do this "flattening"
+itself, along with providing a more robust template compilation step. That's a
+significantly harder problem, and we're working on it. The goal is for
+django-pancake not to have to exist.
+
+But, in the meantime, here are some related projects that have gone down that
+road:
+
+* templatetk
+  https://github.com/mitsuhiko/templatetk/
+
+* django-template-preprocessor
+  https://github.com/citylive/django-template-preprocessor/
