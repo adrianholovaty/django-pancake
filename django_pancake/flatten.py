@@ -11,12 +11,20 @@ class ASTNode(object):
     def __repr__(self):
         return '<%s %s>' % (self.__class__.__name__, self.name)
 
+    def sub_text(self):
+        for leaf in self.leaves:
+            if isinstance(leaf, ASTNode):
+                for subleaf in leaf.sub_text():
+                    yield subleaf
+            else:
+                yield leaf
+
     def sub_nodes(self):
-        for child in self.leaves:
-            if isinstance(child, ASTNode):
-                yield child
-                for subnode in child.sub_nodes():
-                    yield subnode
+        for leaf in self.leaves:
+            if isinstance(leaf, ASTNode):
+                yield leaf
+                for subleaf in leaf.sub_nodes():
+                    yield subleaf
 
 class Template(ASTNode):
     "Root node of the AST. Represents a template, which may or may not have a parent."
@@ -34,7 +42,7 @@ class TemplateDirectory(object):
     def __init__(self, directory):
         self.directory = directory
 
-    def __getitem__(self, template_name, default=None):
+    def __getitem__(self, template_name):
         filename = os.path.join(self.directory, template_name)
         return open(filename).read()
 
@@ -47,7 +55,7 @@ class Parser(object):
         self.root = Template(template_name)
         self.stack = [self.root]
         self.current = self.root
-        self.tokens = Lexer(templates[template_name], 'django-pancake').tokenize()
+        self.tokens = Lexer(self.templates[template_name], 'django-pancake').tokenize()
         while self.tokens:
             token = self.next_token()
 
@@ -107,20 +115,23 @@ def flatten_parsed_template(template):
     # Now, starting with the base template, loop downward over the child
     # templates (getting more specific). For each child template, fill in the
     # blocks in the parent template.
-    result = family[0]
+    master = family[0]
     for child in family[1:]:
         for block in child.sub_nodes():
-            if block.name in result.blocks:
-                result.blocks[block.name].leaves = block.leaves
-    return result
+            if block.name in master.blocks:
+                master.blocks[block.name].leaves = block.leaves
+            else:
+                # This is a new block that wasn't defined in the parent.
+                # Put it in master.blocks so that its children can access it.
+                master.blocks[block.name] = block
+
+    return ''.join(master.sub_text())
 
 def flatten(source, templates):
-    f = Flattener()
-    result = f.flatten(source, templates)
-    return result
+    p = Parser()
+    template = p.parse(source, templates)
+    return flatten_parsed_template(template)
 
 if __name__ == "__main__":
-    from django_pancake.flatten import Parser, TemplateDirectory, flatten_parsed_template
-    p = Parser()
-    tp = p.parse('newsitem_list/neighbor-events.html', TemplateDirectory('/Users/adrian/code/everyblock/everyblock/everyblock/templates/site'))
-    result = flatten_parsed_template(tp)
+    # from django_pancake.flatten import flatten
+    print flatten('newsitem_list/neighbor-events.html', TemplateDirectory('/Users/adrian/code/everyblock/everyblock/everyblock/templates/site'))

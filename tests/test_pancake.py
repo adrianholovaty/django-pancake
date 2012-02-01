@@ -13,12 +13,12 @@ TESTS = {
     'load1': ('{% extends "base1" %}{% load humanize %}{% block title %}Load 1{% endblock %}', '{% load humanize %}<html><title>It worked</title></html>'),
     'load2': ('{% extends "loadbase1" %}{% load humanize %}{% block title %}Load 2{% endblock %}', '{% load humanize webdesign %}<html><title>Load 2</title></html>'),
 }
-templates = dict((k, v[0]) for k, v in TESTS.items())
+TEMPLATES = dict((k, v[0]) for k, v in TESTS.items())
 
 def test_flatten():
     for template_name, (template_source, pancake_source) in TESTS.items():
-        yield check_flatten, template_source, pancake_source
+        yield check_flatten, template_name, pancake_source
 
-def check_flatten(source, expected):
-    result = flatten(source, templates)
+def check_flatten(template_name, expected):
+    result = flatten(template_name, TEMPLATES)
     assert result == expected, 'expected %r, got %r' % (expected, result)
