@@ -32,6 +32,7 @@ class Template(ASTNode):
         super(Template, self).__init__(name)
         self.parent = None # Template object for the parent template, if there's a parent.
         self.blocks = {} # Maps block names to objects in self.leaves for quick lookup.
+        self.loads = set() # Template libraries to load.
 
 class Block(ASTNode):
     "Represents a {% block %}."
@@ -101,6 +102,11 @@ class Parser(object):
         else:
             raise ValueError('Variable {% extends %} tags not supported')
 
+    def do_load(self, text):
+        # Keep track of which template libraries have been loaded,
+        # so that we can pass them up to the root.
+        self.root.loads.update(text.split())
+
 def flatten_parsed_template(template):
     "Given an AST as returned by the parser, returns a string of flattened template text."
     # First, make a list from the template inheritance structure -- the family.
@@ -124,8 +130,17 @@ def flatten_parsed_template(template):
                 # This is a new block that wasn't defined in the parent.
                 # Put it in master.blocks so that its children can access it.
                 master.blocks[block.name] = block
+        master.loads.update(child.loads)
 
-    return ''.join(master.sub_text())
+    result = list(master.sub_text())
+
+    # Add the {% load %} statements from all children.
+    # Put them in alphabetical order to be consistent.
+    if master.loads:
+        loads = sorted(master.loads)
+        result.insert(0, '{%% load %s %%}' % ' '.join(loads))
+
+    return ''.join(result)
 
 def flatten(source, templates):
     p = Parser()
