@@ -26,6 +26,9 @@ TESTS = {
     'within2': ('{% extends "withinbase1" %}  {% block title %}Some page{% endblock %}', '<title>Some page | Example.com</title>'),
 
     # Three-level inheritance structure.
+    '3levelbase1': ('{% block content %}Welcome!<br>{% block header %}{% endblock %}{% endblock %}', 'Welcome!<br>'),
+    '3levelbase2': ('{% extends "3levelbase1" %}{% block header %}<h1>{% block h1 %}{% endblock %}</h1>{% endblock %}', 'Welcome!<br><h1></h1>'),
+    '3level1': ('{% extends "3levelbase2" %}{% block h1 %}Title goes here{% endblock %}', 'Welcome!<br><h1>Title goes here</h1>'),
 
     # {% load %} statements get bubbled up and combined.
     'loadbase1': ('{% load webdesign %}<html><title>{% block title %}{% endblock %}</title></html>', '{% load webdesign %}<html><title></title></html>'),
