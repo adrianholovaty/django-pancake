@@ -10,6 +10,9 @@ TESTS = {
     'base1': ('<html><title>{% block title %}{% endblock %}</title></html>', '<html><title></title></html>'),
     'child1': ('{% extends "base1" %} {% block title %}It worked{% endblock %}', '<html><title>It worked</title></html>'),
 
+    # Empty child.
+    'emptychild1': ('{% extends "base1" %}', '<html><title></title></html>'),
+
     # Junk in child templates.
     'junk1': ('{% extends "base1" %} Junk goes here', '<html><title></title></html>'),
     'junk2': ('{% extends "base1" %} Junk goes here {% some_tag %}', '<html><title></title></html>'),
@@ -25,6 +28,10 @@ TESTS = {
     'within1': ('{% extends "withinbase1" %}  {% block fulltitle %}Yay{% endblock %}', '<title>Yay</title>'),
     'within2': ('{% extends "withinbase1" %}  {% block title %}Some page{% endblock %}', '<title>Some page | Example.com</title>'),
 
+    # Blocks within blocks, overriding both blocks.
+    'bothblocks1': ('{% extends "withinbase1" %}{% block fulltitle %}Outer{% endblock %}{% block title %}Inner{% endblock %}', '<title>Outer</title>'),
+    'bothblocks2': ('{% extends "withinbase1" %}{% block title %}Inner{% endblock %}{% block fulltitle %}Outer{% endblock %}', '<title>Outer</title>'),
+
     # Three-level inheritance structure.
     '3levelbase1': ('{% block content %}Welcome!<br>{% block header %}{% endblock %}{% endblock %}', 'Welcome!<br>'),
     '3levelbase2': ('{% extends "3levelbase1" %}{% block header %}<h1>{% block h1 %}{% endblock %}</h1>{% endblock %}', 'Welcome!<br><h1></h1>'),
@@ -34,6 +41,15 @@ TESTS = {
     'loadbase1': ('{% load webdesign %}<html><title>{% block title %}{% endblock %}</title></html>', '{% load webdesign %}<html><title></title></html>'),
     'load1': ('{% extends "base1" %}{% load humanize %}{% block title %}Load 1{% endblock %}', '{% load humanize %}<html><title>Load 1</title></html>'),
     'load2': ('{% extends "loadbase1" %}{% load humanize %}{% block title %}Load 2{% endblock %}', '{% load humanize webdesign %}<html><title>Load 2</title></html>'),
+
+    # block.super.
+    'super1': ('{% extends "withinbase1" %}{% block title %}{{ block.super }} to the site{% endblock %}', '<title>Welcome to the site | Example.com</title>'),
+    'super2': ('{% extends "withinbase1" %}{% block title %}{{ block.super }} {{ block.super }} {{ block.super }}{% endblock %}', '<title>Welcome Welcome Welcome | Example.com</title>'),
+
+    # block.super, skipping a level.
+    'superskip1': ('{% block header %}{% block h1 %}{% endblock %}<p>Header</p>{% endblock %}', '<p>Header</p>'),
+    'superskip2': ('{% extends "superskip1" %}', '<p>Header</p>'),
+    'superskip3': ('{% extends "superskip2" %}{% block h1 %}<h1>Title</h1>{% endblock %}', '<h1>Title</h1><p>Header</p>'),
 }
 TEMPLATES = dict((k, v[0]) for k, v in TESTS.items())
 
