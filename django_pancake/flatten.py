@@ -64,7 +64,12 @@ class Parser(object):
                 self.current.leaves.append(token.contents)
 
             elif token.token_type == 1: # TOKEN_VAR
-                self.current.leaves.append('{{ %s }}' % token.contents)
+                if token.contents == 'block.super':
+                    if self.root.parent is None:
+                        raise ValueError('Got {{ block.super }} in a template that has no parent')
+                    self.current.leaves.extend(self.root.parent.blocks[self.stack[-1].name].leaves)
+                else:
+                    self.current.leaves.append('{{ %s }}' % token.contents)
 
             elif token.token_type == 2: # TOKEN_BLOCK
                 try:
