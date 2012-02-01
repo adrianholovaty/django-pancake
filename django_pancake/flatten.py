@@ -6,13 +6,13 @@ class ASTNode(object):
     "A node in the AST."
     def __init__(self, name):
         self.name = name
-        self.children = [] # Each child can be a string or another ASTNode.
+        self.leaves = [] # Each leaf can be a string or another ASTNode.
 
     def __repr__(self):
         return '<%s %s>' % (self.__class__.__name__, self.name)
 
     def sub_nodes(self):
-        for child in self.children:
+        for child in self.leaves:
             if isinstance(child, ASTNode):
                 yield child
                 for subnode in child.sub_nodes():
@@ -23,7 +23,7 @@ class Template(ASTNode):
     def __init__(self, name):
         super(Template, self).__init__(name)
         self.parent = None # Template object for the parent template, if there's a parent.
-        self.blocks = {} # Maps block names to objects in self.children for quick lookup.
+        self.blocks = {} # Maps block names to objects in self.leaves for quick lookup.
 
 class Block(ASTNode):
     "Represents a {% block %}."
@@ -52,10 +52,10 @@ class Parser(object):
             token = self.next_token()
 
             if token.token_type == 0: # TOKEN_TEXT
-                self.current.children.append(token.contents)
+                self.current.leaves.append(token.contents)
 
             elif token.token_type == 1: # TOKEN_VAR
-                self.current.children.append('{{ %s }}' % token.contents)
+                self.current.leaves.append('{{ %s }}' % token.contents)
 
             elif token.token_type == 2: # TOKEN_BLOCK
                 try:
@@ -66,7 +66,7 @@ class Parser(object):
                 if hasattr(self, method_name):
                     getattr(self, method_name)(arg)
                 else:
-                    self.current.children.append('{%% %s %%}' % token.contents)
+                    self.current.leaves.append('{%% %s %%}' % token.contents)
 
         return self.root
 
@@ -76,8 +76,8 @@ class Parser(object):
     def do_block(self, text):
         if not text:
             raise ValueError('{% block %} without a name')
-        self.current.children.append(Block(text))
-        self.root.blocks[text] = self.current = self.current.children[-1]
+        self.current.leaves.append(Block(text))
+        self.root.blocks[text] = self.current = self.current.leaves[-1]
         self.stack.append(self.current)
 
     def do_endblock(self, text):
@@ -111,7 +111,7 @@ def flatten_parsed_template(template):
     for child in family[1:]:
         for block in child.sub_nodes():
             if block.name in result.blocks:
-                result.blocks[block.name].children = block.children
+                result.blocks[block.name].leaves = block.leaves
     return result
 
 def flatten(source, templates):
