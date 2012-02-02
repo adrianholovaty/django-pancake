@@ -37,6 +37,11 @@ TESTS = {
     '3levelbase2': ('{% extends "3levelbase1" %}{% block header %}<h1>{% block h1 %}{% endblock %}</h1>{% endblock %}', 'Welcome!<br><h1></h1>'),
     '3level1': ('{% extends "3levelbase2" %}{% block h1 %}Title goes here{% endblock %}', 'Welcome!<br><h1>Title goes here</h1>'),
 
+    # Inheritance, skipping a level.
+    'skiplevel1': ('{% block header %}{% block h1 %}{% endblock %}<p>Header</p>{% endblock %}', '<p>Header</p>'),
+    'skiplevel2': ('{% extends "skiplevel1" %}', '<p>Header</p>'),
+    'skiplevel3': ('{% extends "skiplevel2" %}{% block h1 %}<h1>Title</h1>{% endblock %}', '<h1>Title</h1><p>Header</p>'),
+
     # {% load %} statements get bubbled up and combined.
     'loadbase1': ('{% load webdesign %}<html><title>{% block title %}{% endblock %}</title></html>', '{% load webdesign %}<html><title></title></html>'),
     'load1': ('{% extends "base1" %}{% load humanize %}{% block title %}Load 1{% endblock %}', '{% load humanize %}<html><title>Load 1</title></html>'),
@@ -49,7 +54,7 @@ TESTS = {
     # block.super, skipping a level.
     'superskip1': ('{% block header %}{% block h1 %}{% endblock %}<p>Header</p>{% endblock %}', '<p>Header</p>'),
     'superskip2': ('{% extends "superskip1" %}', '<p>Header</p>'),
-    'superskip3': ('{% extends "superskip2" %}{% block h1 %}<h1>Title</h1>{% endblock %}', '<h1>Title</h1><p>Header</p>'),
+    'superskip3': ('{% extends "superskip2" %}{% block header %}Here: {{ block.super }}{% endblock %}', 'Here: <p>Header</p>'),
 }
 TEMPLATES = dict((k, v[0]) for k, v in TESTS.items())
 
