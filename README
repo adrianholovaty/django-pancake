@@ -6,15 +6,16 @@ By Adrian Holovaty <adrian@holovaty.com>
 
 Library for "flattening" Django templates.
 
-Run "manage.py pancake" with an output directory name, and it will fill that
+Run "make_pancakes.py" with an output directory name, and it will fill that
 directory with a "flat" version of each template -- a pancake. A pancake is a
 template in which:
 
 * Template inheritance is fully expanded. {% extends %} and {% block %} tags
   are gone, and the parent templates are fully folded in.
 
-* {% include %} and {% ssi %} tags are gone, with their contents fully folded
-  in.
+* {% include %} tags are gone, with their contents fully folded in.
+
+* Template comments are removed: {% comment %} syntax and {# short syntax #}.
 
 Pancakes behave exactly the same as the original templates. But they render
 more quickly, because they avoid the overhead of template inheritance and
@@ -29,17 +30,59 @@ markup from the base template(s), etc. You shouldn't check pancakes into
 revision control or hand-edit them. They're purely for performance and should
 be handled as any automatically generated code.
 
+Pros and cons
+=============
+
+Pros:
+
+* Makes run-time template rendering faster. In some cases, the rendering is
+  significantly faster. See "How fast is the speed improvement?" below.
+
+* Not a huge commitment. Give it a shot and see whether it makes things faster
+  for you.
+
+Cons:
+
+* Makes your deployment more complex, as you now have to manage generated
+  templates and run django-pancake to generate them whenever you deploy.
+
+* May require you to change the way you write templates, specifically by
+  removing dynamic {% include %} and {% extends %} tags. See "Limitations"
+  below.
+
+* (Philosophical.) Django really should do this in memory rather than compiling
+  to templates on the filesystem. See "Related projects" below.
+
+How fast is the speed improvement?
+==================================
+
+It depends on what you're doing in templates.
+
+If you're just using basic template inheritance and includes, you should expect
+a tiny/negligible performance improvement -- on the order of 10 milliseconds
+for a single template render. In this case, it may not be worth the added
+complexity it introduces to your deployment environment.
+
+But if you're doing crazy things -- say, having a template with a template tag
+that loads other templates, within a loop, with each subtemplate being in an
+inheritance structure three levels deep -- then you might see a significant
+benefit that makes it worth the complexity.
+
+At EveryBlock, we found it sped a certain type of page up by 200 milliseconds,
+which is pretty great.
+
 Usage
 =====
 
-1. Generate the pancakes:
+1. Generate the pancakes. Pass it the directory that contains your source
+   templates and the directory you want pancakes to be generated in.
 
-    ./manage.py pancake /path/to/new/template/directory
+    python test_pancake.py /path/to/source/directory /path/to/pancake/directory
 
 2. Point Django at the pancake directory:
 
     TEMPLATE_DIRS = [
-        '/path/to/new/template/directory',
+        '/path/to/pancake/directory',
     ]
 
 3. Enjoy faster template performance.
@@ -49,23 +92,17 @@ Limitations
 
 The following features of the Django template system are NOT supported. If
 you run django-pancake on a template containing one of these things, it will
-complain with an error message.
+raise a PancakeFail exception.
 
-* Dynamic {% extends %} or {% include %} tags. For example:
+* Dynamic {% extends %} tags. Example: {% extends my_template_name %}
 
-      {% extends my_template_name %}
-      {% include some_template %}
+* Dynamic {% include %} tags. Example: {% include some_include %}
 
-  Solution: Use hard-coded parent template names:
+The following techniques are allowed but don't take advantage of flattening:
 
-      {% extends "some_template.html" %}
-      {% include "my_include.html" %}
-
-* {% include %} tags using the "only" keyword. For example:
-
-      {% include "my_include.html" only %}
-
-  Solution: Do not use "only."
+* {% include %} tags using the "only" keyword. In this case, django-pancake
+  will just output the same {% include %} tag, so you don't get the benefit of
+  flattening.
 
 Related projects
 ================
