@@ -6,7 +6,7 @@ By Adrian Holovaty <adrian@holovaty.com>
 
 Library for "flattening" Django templates.
 
-Run "make_pancakes.py" with an output directory name, and it will fill that
+Run ``make_pancakes.py`` with an output directory name, and it will fill that
 directory with a "flat" version of each template -- a pancake. A pancake is a
 template in which:
 
@@ -77,7 +77,7 @@ Usage
 1. Generate the pancakes. Pass it the directory that contains your source
    templates and the directory you want pancakes to be generated in::
 
-    python test_pancake.py /path/to/source/directory /path/to/pancake/directory
+    python make_pancakes.py /path/to/source/directory /path/to/pancake/directory
 
 2. Point Django at the pancake directory::
 
