@@ -60,6 +60,12 @@ TESTS = {
     'include1': ('<head>{% include "defaultbase1" %}</head>', '<head><title>Default</title></head>'),
     'include2': ('<head>{% include "defaultbase1" with foo=bar %}</head>', '<head>{% with foo=bar %}<title>Default</title>{% endwith %}</head>'),
     'include3': ('<head>{% include "defaultbase1" with foo=bar baz=3 %}</head>', '<head>{% with foo=bar baz=3 %}<title>Default</title>{% endwith %}</head>'),
+
+    # Include tag with 'only'.
+    'includeonly1': ('<head>{% include "defaultbase1" only %}</head>', '<head>{% include "defaultbase1" only %}</head>'),
+
+    # Include tag with variable argument.
+    'includevariable1': ('<head>{% include some_template %}</head>', '<head>{% include some_template %}</head>'),
 }
 TEMPLATES = dict((k, v[0]) for k, v in TESTS.items())
 
