@@ -75,11 +75,11 @@ Usage
 =====
 
 1. Generate the pancakes. Pass it the directory that contains your source
-   templates and the directory you want pancakes to be generated in.
+   templates and the directory you want pancakes to be generated in::
 
     python test_pancake.py /path/to/source/directory /path/to/pancake/directory
 
-2. Point Django at the pancake directory:
+2. Point Django at the pancake directory::
 
     TEMPLATE_DIRS = [
         '/path/to/pancake/directory',
@@ -93,11 +93,11 @@ Limitations
 If you want django-pancake to work with your templates, make sure your
 templates do the following:
 
-* Avoid using block.super in anything but a standalone variable. This is OK:
+* Avoid using block.super in anything but a standalone variable. This is OK::
 
       {{ block.super }}
 
-  But these statements are not:
+  But these statements are not::
 
       {% if block.super %}
       {{ block.super|lower }}
