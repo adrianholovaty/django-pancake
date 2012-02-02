@@ -1,4 +1,4 @@
-from django.template.base import Lexer
+from django.template.base import Lexer, TOKEN_BLOCK, TOKEN_TEXT, TOKEN_VAR
 import os
 import re
 
@@ -63,13 +63,14 @@ class Parser(object):
         self.stack = [self.root]
         self.current = self.root
         self.tokens = Lexer(self.templates[template_name], 'django-pancake').tokenize()
+        _TOKEN_TEXT, _TOKEN_VAR, _TOKEN_BLOCK = TOKEN_TEXT, TOKEN_VAR, TOKEN_BLOCK
         while self.tokens:
             token = self.next_token()
 
-            if token.token_type == 0: # TOKEN_TEXT
+            if token.token_type == _TOKEN_TEXT:
                 self.current.leaves.append(token.contents)
 
-            elif token.token_type == 1: # TOKEN_VAR
+            elif token.token_type == _TOKEN_VAR:
                 if token.contents == 'block.super':
                     if self.root.parent is None:
                         raise PancakeFail('Got {{ block.super }} in a template that has no parent')
@@ -84,7 +85,7 @@ class Parser(object):
                 else:
                     self.current.leaves.append('{{ %s }}' % token.contents)
 
-            elif token.token_type == 2: # TOKEN_BLOCK
+            elif token.token_type == _TOKEN_BLOCK:
                 try:
                     tag_name, arg = token.contents.split(None, 1)
                 except ValueError:
@@ -119,6 +120,18 @@ class Parser(object):
             self.root.parent = Parser().parse(parent_name, self.templates)
         else:
             raise PancakeFail('Variable {%% extends %%} tags are not supported (file: %r)' % self.root.name)
+
+    def do_comment(self, text):
+        # Consume all tokens until 'endcomment'
+        while self.tokens:
+            token = self.next_token()
+            if token.token_type == TOKEN_BLOCK:
+                try:
+                    tag_name, arg = token.contents.split(None, 1)
+                except ValueError:
+                    tag_name, arg = token.contents.strip(), None
+                if tag_name == 'endcomment':
+                    break
 
     def do_load(self, text):
         # Keep track of which template libraries have been loaded,
