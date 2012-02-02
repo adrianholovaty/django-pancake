@@ -10,12 +10,13 @@ Run ``make_pancakes.py`` with an output directory name, and it will fill that
 directory with a "flat" version of each template -- a pancake. A pancake is a
 template in which:
 
-* Template inheritance is fully expanded. {% extends %} and {% block %} tags
-  are gone, and the parent templates are fully folded in.
+* Template inheritance is fully expanded. ``{% extends %}`` and ``{% block %}``
+  tags are gone, and the parent templates are fully folded in.
 
-* {% include %} tags are gone, with their contents fully folded in.
+* ``{% include %}`` tags are gone, with their contents fully folded in.
 
-* Template comments are removed: {% comment %} syntax and {# short syntax #}.
+* Template comments are removed: ``{% comment %}`` syntax and
+  ``{# short syntax #}``.
 
 Pancakes behave exactly the same as the original templates. But they render
 more quickly, because they avoid the overhead of template inheritance and
@@ -47,8 +48,8 @@ Cons:
   templates and run django-pancake to generate them whenever you deploy.
 
 * May require you to change the way you write templates, specifically by
-  removing dynamic {% include %} and {% extends %} tags. See "Limitations"
-  below.
+  removing dynamic ``{% include %}`` and ``{% extends %}`` tags. See
+  "Limitations" below.
 
 * (Philosophical.) Django really should do this in memory rather than compiling
   to templates on the filesystem. See "Related projects" below.
@@ -93,7 +94,8 @@ Limitations
 If you want django-pancake to work with your templates, make sure your
 templates do the following:
 
-* Avoid using block.super in anything but a standalone variable. This is OK::
+* Avoid using ``block.super`` in anything but a standalone variable. This is
+  OK::
 
       {{ block.super }}
 
@@ -103,24 +105,24 @@ templates do the following:
       {{ block.super|lower }}
       {% some_other_tag block.super %}
 
-  If you use block.super in one of these prohibited ways, django-pancake will
-  not detect it and will generate your templates as if everything is OK. But
-  you'll likely get odd behavior when the template is rendered. The problem is
-  that "block" is no longer a variable in the pancakes, so it'll be evaluated
-  as False.
+  If you use ``block.super`` in one of these prohibited ways, django-pancake
+  will not detect it and will generate your templates as if everything is OK.
+  But you'll likely get odd behavior when the template is rendered. The problem
+  is that ``block`` is no longer a variable in the pancakes, so it'll be
+  evaluated as ``False``.
 
-* Avoid dynamic {% extends %} tags -- that is, when the parent template name is
-  a variable. Example: {% extends my_template_name %} (note the lack of quotes
-  around my_template_name). If you do this, django-pancake will raise a
-  PancakeFail exception.
+* Avoid dynamic ``{% extends %}`` tags -- that is, when the parent template
+  name is a variable. Example: ``{% extends my_template_name %}`` (note the
+  lack of quotes around ``my_template_name``). If you do this, django-pancake
+  will raise a ``PancakeFail`` exception.
 
-* Likewise, avoid dynamic {% include %} tags. Example:
-  {% include some_include %}. If you do this, django-pancake will raise a
-  PancakeFail exception.
+* Likewise, avoid dynamic ``{% include %}`` tags. Example:
+  ``{% include some_include %}``. If you do this, django-pancake will raise a
+  ``PancakeFail`` exception.
 
-* Don't use the "only" keyword in {% include %} tags. If you do, django-pancake
-  won't raise an exception, but it'll merely output the same {% include %} tag,
-  so you don't get the benefit of flattening.
+* Don't use the "only" keyword in ``{% include %}`` tags. If you do,
+  django-pancake won't raise an exception, but it'll merely output the same
+  ``{% include %}`` tag, so you don't get the benefit of flattening.
 
 Related projects
 ================
@@ -133,8 +135,6 @@ django-pancake not to have to exist.
 But, in the meantime, here are some related projects that have gone down that
 road:
 
-* templatetk
-  https://github.com/mitsuhiko/templatetk/
+* templatetk (https://github.com/mitsuhiko/templatetk/)
 
-* django-template-preprocessor
-  https://github.com/citylive/django-template-preprocessor/
+* django-template-preprocessor (https://github.com/citylive/django-template-preprocessor/)
