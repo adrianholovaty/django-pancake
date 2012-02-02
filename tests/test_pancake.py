@@ -58,6 +58,8 @@ TESTS = {
 
     # Include tag.
     'include1': ('<head>{% include "defaultbase1" %}</head>', '<head><title>Default</title></head>'),
+    'include2': ('<head>{% include "defaultbase1" with foo=bar %}</head>', '<head>{% with foo=bar %}<title>Default</title>{% endwith %}</head>'),
+    'include3': ('<head>{% include "defaultbase1" with foo=bar baz=3 %}</head>', '<head>{% with foo=bar baz=3 %}<title>Default</title>{% endwith %}</head>'),
 }
 TEMPLATES = dict((k, v[0]) for k, v in TESTS.items())
 
