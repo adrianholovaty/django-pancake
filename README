@@ -44,6 +44,18 @@ Usage
 
 3. Enjoy faster template performance.
 
+Limitations
+===========
+
+* This will not work with templates that use dynamic {% extends %} tags. For
+  example, a template containing this will not work:
+
+      {% extends my_template_name %}
+
+  It will only work with hard-coded parent template names, like this:
+
+      {% extends "some_template.html" %}
+
 Related projects
 ================
 
