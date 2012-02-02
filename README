@@ -90,19 +90,37 @@ Usage
 Limitations
 ===========
 
-The following features of the Django template system are NOT supported. If
-you run django-pancake on a template containing one of these things, it will
-raise a PancakeFail exception.
+If you want django-pancake to work with your templates, make sure your
+templates do the following:
 
-* Dynamic {% extends %} tags. Example: {% extends my_template_name %}
+* Avoid using block.super in anything but a standalone variable. This is OK:
 
-* Dynamic {% include %} tags. Example: {% include some_include %}
+      {{ block.super }}
 
-The following techniques are allowed but don't take advantage of flattening:
+  But these statements are not:
 
-* {% include %} tags using the "only" keyword. In this case, django-pancake
-  will just output the same {% include %} tag, so you don't get the benefit of
-  flattening.
+      {% if block.super %}
+      {{ block.super|lower }}
+      {% some_other_tag block.super %}
+
+  If you use block.super in one of these prohibited ways, django-pancake will
+  not detect it and will generate your templates as if everything is OK. But
+  you'll likely get odd behavior when the template is rendered. The problem is
+  that "block" is no longer a variable in the pancakes, so it'll be evaluated
+  as False.
+
+* Avoid dynamic {% extends %} tags -- that is, when the parent template name is
+  a variable. Example: {% extends my_template_name %} (note the lack of quotes
+  around my_template_name). If you do this, django-pancake will raise a
+  PancakeFail exception.
+
+* Likewise, avoid dynamic {% include %} tags. Example:
+  {% include some_include %}. If you do this, django-pancake will raise a
+  PancakeFail exception.
+
+* Don't use the "only" keyword in {% include %} tags. If you do, django-pancake
+  won't raise an exception, but it'll merely output the same {% include %} tag,
+  so you don't get the benefit of flattening.
 
 Related projects
 ================
