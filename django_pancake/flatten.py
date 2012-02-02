@@ -168,26 +168,26 @@ def flatten_ast(template):
         for block in child.sub_nodes():
             if block.name in master.blocks:
                 master.blocks[block.name].leaves = block.leaves
-            else:
-                # This is a new block that wasn't defined in the parent.
-                # Put it in master.blocks so that its children can access it.
-                master.blocks[block.name] = block
+            # For all blocks that this NEW template defined, update
+            # master.blocks so that any subsequent children can access and
+            # override the right thing.
+            for child_leaf in block.sub_nodes():
+                master.blocks[child_leaf.name] = child_leaf
         master.loads.update(child.loads)
-    return master
-
-def flatten(source, templates):
-    p = Parser()
-    template = p.parse(source, templates)
-    flat = flatten_ast(template)
-    result = list(flat.sub_text())
 
     # Add the {% load %} statements from all children.
     # Put them in alphabetical order to be consistent.
-    if flat.loads:
-        loads = sorted(flat.loads)
-        result.insert(0, '{%% load %s %%}' % ' '.join(loads))
+    if master.loads:
+        loads = sorted(master.loads)
+        master.leaves.insert(0, '{%% load %s %%}' % ' '.join(loads))
 
-    return ''.join(result)
+    return master
+
+def flatten(template_name, templates):
+    p = Parser()
+    template = p.parse(template_name, templates)
+    flat = flatten_ast(template)
+    return ''.join(flat.sub_text())
 
 if __name__ == "__main__":
     # from django_pancake.flatten import flatten
