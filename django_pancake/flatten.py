@@ -48,6 +48,9 @@ class TemplateDirectory(object):
         return open(filename).read()
 
 class Parser(object):
+    def __init__(self, fail_gracefully=True):
+        self.fail_gracefully = fail_gracefully
+
     def parse(self, template_name, templates):
         """
         Creates an AST for the given template. Returns a Template object.
@@ -121,13 +124,21 @@ class Parser(object):
 
     def do_include(self, text):
         if ' only' in text:
-            raise ValueError('{% include %} tags containing "only" are not supported')
+            if self.fail_gracefully:
+                self.current.leaves.append('{%% include %s %%}' % text)
+                return
+            else:
+                raise ValueError('{% include %} tags containing "only" are not supported')
         try:
             template_name, rest = text.split(None, 1)
         except ValueError:
             template_name, rest = text, ''
         if not template_name[0] in ('"', "'"):
-            raise ValueError('Variable {% include %} tags are not supported')
+            if self.fail_gracefully:
+                self.current.leaves.append('{%% include %s %%}' % text)
+                return
+            else:
+                raise ValueError('Variable {% include %} tags are not supported')
         template_name = template_name[1:-1]
         if rest.startswith('with '):
             rest = rest[5:]
