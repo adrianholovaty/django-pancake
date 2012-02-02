@@ -47,14 +47,25 @@ Usage
 Limitations
 ===========
 
-* This will not work with templates that use dynamic {% extends %} tags. For
-  example, a template containing this will not work:
+The following features of the Django template system are NOT supported. If
+you run django-pancake on a template containing one of these things, it will
+complain with an error message.
+
+* Dynamic {% extends %} or {% include %} tags. For example:
 
       {% extends my_template_name %}
+      {% include some_template %}
 
-  It will only work with hard-coded parent template names, like this:
+  Solution: Use hard-coded parent template names:
 
       {% extends "some_template.html" %}
+      {% include "my_include.html" %}
+
+* {% include %} tags using the "only" keyword. For example:
+
+      {% include "my_include.html" only %}
+
+  Solution: Do not use "only."
 
 Related projects
 ================
