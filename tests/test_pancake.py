@@ -75,6 +75,11 @@ TESTS = {
 
     # Include tag with variable argument.
     'includevariable1': ('<head>{% include some_template %}</head>', '<head>{% include some_template %}</head>'),
+
+    # Remove template comments.
+    'comments1': ('lo{% comment %}Long-style comment{% endcomment %}ve', 'love'),
+    'comments2': ('lo{# Short-style comment #}ve', 'love'),
+    'comments3': ('lo{% comment %}{% if foo %}foo{% else %}bar{% endif %}{# Inner comment #}Some other stuff{% endcomment %}ve', 'love'),
 }
 TEMPLATES = dict((k, v[0]) for k, v in TESTS.items())
 
