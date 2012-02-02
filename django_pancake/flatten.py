@@ -190,5 +190,5 @@ def flatten(template_name, templates):
     return ''.join(flat.sub_text())
 
 if __name__ == "__main__":
-    # from django_pancake.flatten import flatten
-    print flatten('newsitem_list/neighbor-events.html', TemplateDirectory('/Users/adrian/code/everyblock/everyblock/everyblock/templates/site'))
+    import sys
+    print flatten(sys.argv[1], TemplateDirectory(sys.argv[2]))
