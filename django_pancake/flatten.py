@@ -2,6 +2,9 @@ from django.template.base import Lexer
 import os
 import re
 
+class PancakeFail(Exception):
+    pass
+
 class ASTNode(object):
     "A node in the AST."
     def __init__(self, name):
@@ -69,7 +72,7 @@ class Parser(object):
             elif token.token_type == 1: # TOKEN_VAR
                 if token.contents == 'block.super':
                     if self.root.parent is None:
-                        raise ValueError('Got {{ block.super }} in a template that has no parent')
+                        raise PancakeFail('Got {{ block.super }} in a template that has no parent')
 
                     super_block_name = self.stack[-1].name
                     current_par = self.root.parent
@@ -99,7 +102,7 @@ class Parser(object):
 
     def do_block(self, text):
         if not text:
-            raise ValueError('{% block %} without a name')
+            raise PancakeFail('{% block %} without a name')
         self.current.leaves.append(Block(text))
         self.root.blocks[text] = self.current = self.current.leaves[-1]
         self.stack.append(self.current)
@@ -110,12 +113,12 @@ class Parser(object):
 
     def do_extends(self, text):
         if not text:
-            raise ValueError('{%% extends %%} without an argument (file: %r)' % self.root.name)
+            raise PancakeFail('{%% extends %%} without an argument (file: %r)' % self.root.name)
         if text[0] in ('"', "'"):
             parent_name = text[1:-1]
             self.root.parent = Parser().parse(parent_name, self.templates)
         else:
-            raise ValueError('Variable {%% extends %%} tags are not supported (file: %r)' % self.root.name)
+            raise PancakeFail('Variable {%% extends %%} tags are not supported (file: %r)' % self.root.name)
 
     def do_load(self, text):
         # Keep track of which template libraries have been loaded,
@@ -128,7 +131,7 @@ class Parser(object):
                 self.current.leaves.append('{%% include %s %%}' % text)
                 return
             else:
-                raise ValueError('{%% include %%} tags containing "only" are not supported (file: %r)' % self.root.name)
+                raise PancakeFail('{%% include %%} tags containing "only" are not supported (file: %r)' % self.root.name)
         try:
             template_name, rest = text.split(None, 1)
         except ValueError:
@@ -138,7 +141,7 @@ class Parser(object):
                 self.current.leaves.append('{%% include %s %%}' % text)
                 return
             else:
-                raise ValueError('Variable {%% include %%} tags are not supported (file: %r)' % self.root.name)
+                raise PancakeFail('Variable {%% include %%} tags are not supported (file: %r)' % self.root.name)
         template_name = template_name[1:-1]
         if rest.startswith('with '):
             rest = rest[5:]
