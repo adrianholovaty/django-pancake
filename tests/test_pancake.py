@@ -55,6 +55,9 @@ TESTS = {
     'superskip1': ('{% block header %}{% block h1 %}{% endblock %}<p>Header</p>{% endblock %}', '<p>Header</p>'),
     'superskip2': ('{% extends "superskip1" %}', '<p>Header</p>'),
     'superskip3': ('{% extends "superskip2" %}{% block header %}Here: {{ block.super }}{% endblock %}', 'Here: <p>Header</p>'),
+
+    # Include tag.
+    'include1': ('<head>{% include "defaultbase1" %}</head>', '<head><title>Default</title></head>'),
 }
 TEMPLATES = dict((k, v[0]) for k, v in TESTS.items())
 
