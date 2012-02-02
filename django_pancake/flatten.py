@@ -112,12 +112,31 @@ class Parser(object):
             parent_name = text[1:-1]
             self.root.parent = Parser().parse(parent_name, self.templates)
         else:
-            raise ValueError('Variable {% extends %} tags not supported')
+            raise ValueError('Variable {% extends %} tags are not supported')
 
     def do_load(self, text):
         # Keep track of which template libraries have been loaded,
         # so that we can pass them up to the root.
         self.root.loads.update(text.split())
+
+    def do_include(self, text):
+        if ' only' in text:
+            raise ValueError('{% include %} tags containing "only" are not supported')
+        try:
+            template_name, rest = text.split(None, 1)
+        except ValueError:
+            template_name, rest = text, ''
+        if not template_name[0] in ('"', "'"):
+            raise ValueError('Variable {% include %} tags are not supported')
+        template_name = template_name[1:-1]
+        if rest.startswith('with '):
+            rest = rest[5:]
+
+        if rest:
+            self.current.leaves.append('{%% with %s %%}' % rest)
+        self.current.leaves.extend(Parser().parse(template_name, self.templates).leaves)
+        if rest:
+            self.current.leaves.append('{% endwith %}')
 
 def flatten_parsed_template(template):
     "Given an AST as returned by the parser, returns a string of flattened template text."
