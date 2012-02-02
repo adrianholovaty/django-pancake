@@ -149,7 +149,7 @@ class Parser(object):
         if rest:
             self.current.leaves.append('{% endwith %}')
 
-def flatten_parsed_template(template):
+def flatten_ast(template):
     "Given an AST as returned by the parser, returns a string of flattened template text."
     # First, make a list from the template inheritance structure -- the family.
     # This will be in order from broad to specific.
@@ -173,21 +173,21 @@ def flatten_parsed_template(template):
                 # Put it in master.blocks so that its children can access it.
                 master.blocks[block.name] = block
         master.loads.update(child.loads)
-
-    result = list(master.sub_text())
-
-    # Add the {% load %} statements from all children.
-    # Put them in alphabetical order to be consistent.
-    if master.loads:
-        loads = sorted(master.loads)
-        result.insert(0, '{%% load %s %%}' % ' '.join(loads))
-
-    return ''.join(result)
+    return master
 
 def flatten(source, templates):
     p = Parser()
     template = p.parse(source, templates)
-    return flatten_parsed_template(template)
+    flat = flatten_ast(template)
+    result = list(flat.sub_text())
+
+    # Add the {% load %} statements from all children.
+    # Put them in alphabetical order to be consistent.
+    if flat.loads:
+        loads = sorted(flat.loads)
+        result.insert(0, '{%% load %s %%}' % ' '.join(loads))
+
+    return ''.join(result)
 
 if __name__ == "__main__":
     # from django_pancake.flatten import flatten
