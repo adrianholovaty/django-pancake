@@ -110,12 +110,12 @@ class Parser(object):
 
     def do_extends(self, text):
         if not text:
-            raise ValueError('{% extends %} without an argument')
+            raise ValueError('{%% extends %%} without an argument (file: %r)' % self.root.name)
         if text[0] in ('"', "'"):
             parent_name = text[1:-1]
             self.root.parent = Parser().parse(parent_name, self.templates)
         else:
-            raise ValueError('Variable {% extends %} tags are not supported')
+            raise ValueError('Variable {%% extends %%} tags are not supported (file: %r)' % self.root.name)
 
     def do_load(self, text):
         # Keep track of which template libraries have been loaded,
@@ -128,7 +128,7 @@ class Parser(object):
                 self.current.leaves.append('{%% include %s %%}' % text)
                 return
             else:
-                raise ValueError('{% include %} tags containing "only" are not supported')
+                raise ValueError('{%% include %%} tags containing "only" are not supported (file: %r)' % self.root.name)
         try:
             template_name, rest = text.split(None, 1)
         except ValueError:
@@ -138,7 +138,7 @@ class Parser(object):
                 self.current.leaves.append('{%% include %s %%}' % text)
                 return
             else:
-                raise ValueError('Variable {% include %} tags are not supported')
+                raise ValueError('Variable {%% include %%} tags are not supported (file: %r)' % self.root.name)
         template_name = template_name[1:-1]
         if rest.startswith('with '):
             rest = rest[5:]
