@@ -67,7 +67,14 @@ class Parser(object):
                 if token.contents == 'block.super':
                     if self.root.parent is None:
                         raise ValueError('Got {{ block.super }} in a template that has no parent')
-                    self.current.leaves.extend(self.root.parent.blocks[self.stack[-1].name].leaves)
+
+                    super_block_name = self.stack[-1].name
+                    current_par = self.root.parent
+                    while current_par is not None:
+                        if super_block_name in current_par.blocks:
+                            self.current.leaves.extend(current_par.blocks[super_block_name].leaves)
+                            break
+                        current_par = current_par.parent
                 else:
                     self.current.leaves.append('{{ %s }}' % token.contents)
 
