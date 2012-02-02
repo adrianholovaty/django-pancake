@@ -37,6 +37,15 @@ TESTS = {
     '3levelbase2': ('{% extends "3levelbase1" %}{% block header %}<h1>{% block h1 %}{% endblock %}</h1>{% endblock %}', 'Welcome!<br><h1></h1>'),
     '3level1': ('{% extends "3levelbase2" %}{% block h1 %}Title goes here{% endblock %}', 'Welcome!<br><h1>Title goes here</h1>'),
 
+    # Wacky bug: Four-level inheritance structure.
+    'wackylevel1': ('{% block content %}{% endblock %}', ''),
+    'wackylevel2': ('{% extends "wackylevel1" %} {% block content %}<div id="canvas">{% block canvas %}{% endblock %}</div><div id="rail">{% block rail %}{% endblock %}</div>{% endblock %}',
+                    '<div id="canvas"></div><div id="rail"></div>'),
+    'wackylevel3': ('{% extends "wackylevel2" %} {% block content %}<div id="rail">{% block rail %}{% endblock %}</div><div id="canvas">{% block canvas %}{% endblock %}</div>{% endblock %}',
+                    '<div id="rail"></div><div id="canvas"></div>'),
+    'wackylevel4': ('{% extends "wackylevel3" %}{% block rail %}Rail{% endblock %}{% block canvas %}Canvas{% endblock %}',
+                    '<div id="rail">Rail</div><div id="canvas">Canvas</div>'),
+
     # Inheritance, skipping a level.
     'skiplevel1': ('{% block header %}{% block h1 %}{% endblock %}<p>Header</p>{% endblock %}', '<p>Header</p>'),
     'skiplevel2': ('{% extends "skiplevel1" %}', '<p>Header</p>'),
