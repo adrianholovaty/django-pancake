@@ -159,9 +159,14 @@ class Parser(object):
         if rest.startswith('with '):
             rest = rest[5:]
 
+        include_node = Parser().parse(template_name, self.templates)
+
+        # Add {% load %} tags from the included template.
+        self.root.loads.update(include_node.loads)
+
         if rest:
             self.current.leaves.append('{%% with %s %%}' % rest)
-        self.current.leaves.extend(Parser().parse(template_name, self.templates).leaves)
+        self.current.leaves.extend(include_node.leaves)
         if rest:
             self.current.leaves.append('{% endwith %}')
 

@@ -51,10 +51,14 @@ TESTS = {
     'skiplevel2': ('{% extends "skiplevel1" %}', '<p>Header</p>'),
     'skiplevel3': ('{% extends "skiplevel2" %}{% block h1 %}<h1>Title</h1>{% endblock %}', '<h1>Title</h1><p>Header</p>'),
 
-    # {% load %} statements get bubbled up and combined.
+    # {% load %} statements get bubbled up for inheritance.
     'loadbase1': ('{% load webdesign %}<html><title>{% block title %}{% endblock %}</title></html>', '{% load webdesign %}<html><title></title></html>'),
     'load1': ('{% extends "base1" %}{% load humanize %}{% block title %}Load 1{% endblock %}', '{% load humanize %}<html><title>Load 1</title></html>'),
     'load2': ('{% extends "loadbase1" %}{% load humanize %}{% block title %}Load 2{% endblock %}', '{% load humanize webdesign %}<html><title>Load 2</title></html>'),
+
+    # {% load %} statements get bubbled up for includes.
+    'loadinclude1': ('{% load webdesign %}Hello', '{% load webdesign %}Hello'),
+    'load3': ('{% load foo %}{% include "loadinclude1" %} there', '{% load foo webdesign %}Hello there'),
 
     # block.super.
     'super1': ('{% extends "withinbase1" %}{% block title %}{{ block.super }} to the site{% endblock %}', '<title>Welcome to the site | Example.com</title>'),
