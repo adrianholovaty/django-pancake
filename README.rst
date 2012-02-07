@@ -28,10 +28,9 @@ Think of it as "denormalizing" your templates, as a database administrator
 might denormalize SQL tables for performance. You give up the DRY principle
 but make up for it in faster application speed.
 
-Obviously, pancakes are very redundant -- each of them includes all of the
-markup from the base template(s), etc. You shouldn't check pancakes into
-revision control or hand-edit them. They're purely for performance and should
-be handled as any automatically generated code.
+You can also use pancakes as a learning tool. You can examine a pancake to
+see how all of your template blocks fit together in the resulting "compiled"
+template.
 
 Pros and cons
 =============
@@ -82,7 +81,7 @@ which is pretty great. But that was on my laptop, and unfortunately, the speed
 increase went away when the code was deployed onto the production servers
 (which were running the cached template loader). So django-pancake basically
 had no positive effect for us, and I disabled it. But, who knows, it might help
-somebody out.
+somebody else.
 
 Usage
 =====
@@ -133,6 +132,14 @@ templates do the following:
 * Don't use the "only" keyword in ``{% include %}`` tags. If you do,
   django-pancake won't raise an exception, but it'll merely output the same
   ``{% include %}`` tag, so you don't get the benefit of flattening.
+
+Other notes
+===========
+
+Obviously, pancakes are very redundant -- each of them includes all of the
+markup from the base template(s), etc. You shouldn't check pancakes into
+revision control or hand-edit them. They're purely for performance and should
+be handled as any automatically generated code.
 
 Related projects
 ================
