@@ -18,9 +18,11 @@ template in which:
 * Template comments are removed: ``{% comment %}`` syntax and
   ``{# short syntax #}``.
 
-Pancakes behave exactly the same as the original templates. But they render
-more quickly, because they avoid the overhead of template inheritance and
-template includes at rendering time.
+Pancakes behave exactly the same as the original templates. But they might
+render more quickly, because they avoid the overhead of template inheritance
+and template includes at rendering time. (Whether they do or don't actually
+render more quickly depends on other factors such as whether you're using
+template caching.)
 
 Think of it as "denormalizing" your templates, as a database administrator
 might denormalize SQL tables for performance. You give up the DRY principle
@@ -36,13 +38,18 @@ Pros and cons
 
 Pros:
 
-* Makes run-time template rendering faster. In some cases, the rendering is
-  significantly faster. See "How fast is the speed improvement?" below.
+* Might make run-time template rendering faster. In some cases, the rendering
+  is significantly faster. See "How fast is the speed improvement?" below.
+
+* Can help you understand how a complex template inheritance structure works.
+  You can examine a pancake to see how all of the template blocks fit together.
 
 * Not a huge commitment. Give it a shot and see whether it makes things faster
   for you.
 
 Cons:
+
+* Might not actually result in a significant speed increase.
 
 * Makes your deployment more complex, as you now have to manage generated
   templates and run django-pancake to generate them whenever you deploy.
@@ -57,7 +64,8 @@ Cons:
 How fast is the speed improvement?
 ==================================
 
-It depends on what you're doing in templates.
+It depends on what you're doing in templates, and it depends on whether you
+have template caching enabled.
 
 If you're just using basic template inheritance and includes, you should expect
 a tiny/negligible performance improvement -- on the order of 10 milliseconds
@@ -69,8 +77,12 @@ that loads other templates, within a loop, with each subtemplate being in an
 inheritance structure three levels deep -- then you might see a significant
 benefit that makes it worth the complexity.
 
-At EveryBlock, we found it sped a certain type of page up by 200 milliseconds,
-which is pretty great.
+At EveryBlock, I found it sped a certain type of page up by 200 milliseconds,
+which is pretty great. But that was on my laptop, and unfortunately, the speed
+increase went away when the code was deployed onto the production servers
+(which were running the cached template loader). So django-pancake basically
+had no positive effect for us, and I disabled it. But, who knows, it might help
+somebody out.
 
 Usage
 =====
@@ -85,8 +97,6 @@ Usage
     TEMPLATE_DIRS = [
         '/path/to/pancake/directory',
     ]
-
-3. Enjoy faster template performance.
 
 Limitations
 ===========
